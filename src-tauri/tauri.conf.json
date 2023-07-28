@@ -55,11 +55,22 @@
     },
     "windows": [
       {
+        "label": "tools",
         "fullscreen": false,
         "height": 600,
         "resizable": true,
         "title": "tools",
-        "width": 800
+        "width": 800,
+        "url": "/"      
+      },
+      {
+        "label": "tools2",
+        "fullscreen": false,
+        "height": 600,
+        "resizable": true,
+        "title": "tools2",
+        "width": 800,
+        "url": "/ws"
       }
     ]
   }

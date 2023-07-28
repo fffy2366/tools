@@ -2,13 +2,23 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Select from "./Select";
+import UserSelect from "./UserSelect";
+
 interface Option {
   label: string;
   value: string;
 }
+interface User {
+  name: string;
+  email: string;  
+}
 const options: Option[] = [
   { label: "Apple", value: "apple" },
   { label: "Banana", value: "banana" },
+];
+const users: User[] = [
+  { name: "hardy", email: "fengxuting@qq.com" },
+  { name: "frank", email: "fengxuting@gmail.com" },
 ];
 export default function Ws() {
   const [msg, setMsg] = useState("");
@@ -16,10 +26,14 @@ export default function Ws() {
   let pomelo = useRef(require("./pomelo-creator-client"));
   useEffect((): any => {
     pomelo.current = require("./pomelo-creator-client");
-    if(!pomelo.current) {
+    if (!pomelo.current) {
       console.log("pomelo.current is null");
       return;
     }
+    login().then((data) => {
+      console.log("login success");
+    }
+    );
 
     pomelo.current.init(
       {
@@ -41,24 +55,57 @@ export default function Ws() {
         );
       }
     );
-    
   }, []);
 
+  const login = async () => {
+    const user = await fetch("http://localhost:4000/users/mpc/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        },
+      body: JSON.stringify({
+        email: "fengxuting@qq.com",
+        code: "666666",
+      })
+    }).then((res) => res.json());
+    console.log(user);
+  }
+
+  const didLogin = async (token:string) => {
+    const user = await fetch("http://localhost:13009/did/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        },
+      body: JSON.stringify({
+        token
+      })
+    }).then((res) => res.json());
+    console.log(user);
+    return user;
+  }
+
   const sendMessage = () => {
-    // 这里pomelo是null,为啥呢
-    
     if (pomelo.current) {
       pomelo.current.request(route, msg, (data: any) => {
         console.log(data);
+        setMessages((prev) => [...prev, "response:" + msg]);
       });
     }
-    // setMsg("");
+    setMessages((prev) => [...prev, "request:" + msg]);
+    setMsg("");
   };
 
   const [route, setRoute] = useState(options[0].value);
+  const [currenctName, setCurrentName] = useState(users[0].name);
+  const [currenctEmail, setCurrentEmail] = useState(users[0].email);
 
   const handleChange = (value: string) => {
     setRoute(value);
+  };
+  const handleUserChange = (name: string, email: string) => {
+    setCurrentName(name);
+    setCurrentEmail(email);
   };
 
   return (
@@ -70,6 +117,7 @@ export default function Ws() {
       </div>
 
       <div className="flex gap-2 p-2">
+        <UserSelect options={users} label={currenctName} value={currenctEmail} onChange={handleUserChange} />
         <Select options={options} value={route} onChange={handleChange} />
         <input
           className="border p-2 flex-grow"
